@@ -2,19 +2,6 @@ import React, { useState, useMemo, useEffect } from "react";
 import { supabase } from "./supabase";
 import { Store, Layers, Ruler, Shirt, Plus, X, Search, Trash2, Pencil, Check, Zap, CircleAlert, WifiOff, ShoppingBasket, Wand2, Eye, EyeOff, Tag, CalendarClock, SlidersHorizontal, Archive, Camera, CircleCheckBig, Heart, List, LayoutGrid, Sun, Moon } from "lucide-react";
 
-function useStickyState(defaut, cle) {
-  const [valeur, setValeur] = useState(() => {
-    try {
-      const brut = localStorage.getItem(cle);
-      return brut ? JSON.parse(brut) : defaut;
-    } catch { return defaut; }
-  });
-  useEffect(() => {
-    try { localStorage.setItem(cle, JSON.stringify(valeur)); } catch {}
-  }, [cle, valeur]);
-  return [valeur, setValeur];
-}
-
 /* ------------------------------------------------------------------ */
 const THEMES = {
   clair: {
@@ -175,25 +162,26 @@ export default function App() {
 
   const [demarrage, setDemarrage] = useState(true);
   const [tab, setTab] = useState("magasin");
-  const [tissus, setTissus] = useStickyState([], "uttu:tissus");
-  const [mercerie, setMercerie] = useStickyState([], "uttu:mercerie");
+  const [tissus, setTissus] = useState(TISSUS_SEED);
+  const [mercerie, setMercerie] = useState(MERCERIE_SEED);
   const [editMercerie, setEditMercerie] = useState(null);
-  const [tags, setTags] = useStickyState(TAGS_SEED, "uttu:tags");
-  const [patrons, setPatrons] = useStickyState([], "uttu:patrons");
-  const [projets, setProjets] = useStickyState([], "uttu:projets");
-  const [courses, setCourses] = useStickyState([], "uttu:courses");
+  const [patrons, setPatrons] = useState(PATRONS_SEED);
+  const [tags, setTags] = useState(TAGS_SEED);
+  const [projets, setProjets] = useState([]);
+  const [courses, setCourses] = useState([]);
   const [edit, setEdit] = useState(null);
   const [rapide, setRapide] = useState(null);
   const [detail, setDetail] = useState(null);
   const [detailPatron, setDetailPatron] = useState(null);
   const [editPatron, setEditPatron] = useState(null);
   const [detailProjet, setDetailProjet] = useState(null);
-  const [envies, setEnvies] = useStickyState([], "uttu:envies");
+  const [envies, setEnvies] = useState([]);
   const [editEnvie, setEditEnvie] = useState(null);
   const [cloture, setCloture] = useState(null);
   const [detailArchive, setDetailArchive] = useState(null);
   const [gestionTags, setGestionTags] = useState(false);
   const [toast, setToast] = useState("");
+
   const annonce = (m) => { setToast(m); setTimeout(() => setToast(""), 2800); };
 
   const visibles = courses.filter((c) => !c.projetId || projets.find((p) => p.id === c.projetId)?.suivi);
