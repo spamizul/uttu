@@ -375,7 +375,10 @@ function Magasin({ tissus, mercerie, patrons, projets, courses, setCourses, onRa
 
   return (
     <div className="px-4 pt-6">
-      <Entete section="MAGASIN" valeur={n} unite={n > 1 ? "achats" : "achat"} droite={suivis.length > 0 ? `${suivis.length} projet(s) suivi(s)` : "aucun projet suivi"}>
+      <Entete section="MAGASIN" colonnes={[
+        { valeur: n, label: "À TROUVER" },
+        { valeur: suivis.length, label: "PROJETS SUIVIS" },
+      ]}>
         <button onClick={() => setTheme(theme === "clair" ? "sombre" : "clair")}
           style={{ color: C.encre }} aria-label={theme === "clair" ? "Passer en mode soir" : "Passer en mode jour"}>
           {theme === "clair" ? <Sun size={17} strokeWidth={1.7} /> : <Moon size={17} strokeWidth={1.7} />}
@@ -615,7 +618,10 @@ function Projets({ projets, patrons, tissus, onCreer, onSuivi, onOpen, onOpenArc
 
   return (
     <div className="px-4 pt-6">
-      <Entete section="PROJETS" valeur={enCours.length} unite="en cours" droite={`${archives.length} cousus`} />
+      <Entete section="PROJETS" colonnes={[
+        { valeur: enCours.length, label: "EN COURS" },
+        { valeur: archives.length, label: "COUSUS" },
+      ]} />
 
       <div className="flex gap-5 mb-5" style={{ borderBottom: `0.5px solid ${C.line}` }}>
         {[["cours", `En cours${enCours.length ? ` (${enCours.length})` : ""}`], ["archives", `Cousus${archives.length ? ` (${archives.length})` : ""}`]].map(([id, label]) => (
@@ -852,7 +858,9 @@ function EcranEnvies({ envies, onOpen, onAdd }) {
 
   return (
     <div className="px-4 pt-6">
-      <Entete section="ENVIES" valeur={envies.length} unite={envies.length > 1 ? "en attente" : "en attente"} droite="repérées, pas décidées" />
+      <Entete section="ENVIES" colonnes={[
+        { valeur: envies.length, label: "EN ATTENTE" },
+      ]} />
 
       {types.length > 1 && (
         <div className="flex gap-5 mb-5 overflow-x-auto pb-1">
@@ -1145,7 +1153,10 @@ function Patrons({ patrons, tags, onOpen, onAdd, onGererTags }) {
 
   return (
     <div className="px-4 pt-6">
-      <Entete section="PATRONS" valeur={patrons.length} unite="réf" droite={`${cousus} déjà cousus`}>
+      <Entete section="PATRONS" colonnes={[
+        { valeur: patrons.length, label: "PATRONS" },
+        { valeur: cousus, label: "DÉJÀ COUSUS" },
+      ]}>
         <Bascule vue={vue} setVue={setVue} />
       </Entete>
 
@@ -1768,8 +1779,11 @@ function VueTissus({ tissus, liste, matieres, q, setQ, filtre, setFiltre, total,
 
   return (
     <div>
-      <Entete section="RÉSERVE" valeur={total.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-        unite="m" droite={`${tissus.length} réf · ${Math.round(valeur)} €`}>
+      <Entete section="RÉSERVE" colonnes={[
+        { valeur: total.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }), label: "MÈTRES" },
+        { valeur: tissus.length, label: "RÉFÉRENCES" },
+        { valeur: `${Math.round(valeur)} €`, label: "IMMOBILISÉS" },
+      ]}>
         <Bascule vue={vue} setVue={setVue} />
       </Entete>
 
@@ -2187,20 +2201,26 @@ function Points() {
   return <span style={{ flex: 1, borderBottom: `1px dotted ${C.pointille}`, margin: "0 6px", transform: "translateY(-3px)" }} />;
 }
 
-function Entete({ section, valeur, unite, droite, children }) {
+function Entete({ section, colonnes = [], children }) {
   return (
     <div style={{ marginBottom: 12 }}>
       <div className="flex items-center justify-between">
         <span style={mono(9, C.encre, ".18em")}>UTTU / {section}</span>
         {children}
       </div>
-      <div className="flex items-baseline" style={{ marginTop: 6 }}>
-        <span style={{ fontFamily: MONO, fontSize: 27, color: C.ink, letterSpacing: "-0.02em" }}>{valeur}</span>
-        {unite && <span style={{ ...mono(11), marginLeft: 5 }}>{unite}</span>}
-        <Points />
-        <span style={mono(11)}>{droite}</span>
+
+      <div className="flex items-end justify-between" style={{ marginTop: 9, gap: 14 }}>
+        {colonnes.map((c, i) => (
+          <div key={c.label} style={{ textAlign: i === 0 ? "left" : "right" }}>
+            <div style={{ fontFamily: MONO, fontSize: i === 0 ? 25 : 15, color: C.ink, letterSpacing: "-0.02em", lineHeight: 1 }}>
+              {c.valeur}
+            </div>
+            <div style={{ ...mono(8.5, C.inkSoft, ".12em"), marginTop: 4 }}>{c.label}</div>
+          </div>
+        ))}
       </div>
-      <div style={{ borderTop: `1.5px solid ${C.ink}`, marginTop: 9 }} />
+
+      <div style={{ borderTop: `1.5px solid ${C.ink}`, marginTop: 11 }} />
     </div>
   );
 }

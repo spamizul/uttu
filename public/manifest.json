@@ -1,0 +1,12 @@
+{
+  "name": "Uttu",
+  "short_name": "Uttu",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0F0E0C",
+  "theme_color": "#F6F5F0",
+  "icons": [
+    { "src": "/uttu-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/uttu-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
