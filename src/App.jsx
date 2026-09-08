@@ -171,6 +171,9 @@ export default function App() {
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute("content", THEMES[theme].page);
     document.body.style.background = THEMES[theme].page;
+    const r = document.documentElement.style;
+    r.setProperty("--ink", THEMES[theme].ink);
+    r.setProperty("--line", THEMES[theme].line);
   }, [theme]);
 
   const [demarrage, setDemarrage] = useState(true);
@@ -2142,9 +2145,19 @@ function Formulaire({ tissu, onSave, onClose }) {
   );
 }
 
+const styleGlobal = document.createElement("style");
+styleGlobal.textContent = `
+  input::placeholder, textarea::placeholder {
+    font-style: italic;
+    color: var(--ink);
+    opacity: 0.4;
+  }
+`;
+document.head.appendChild(styleGlobal);
 const inputStyle = {
-  width: "100%", background: "transparent", border: "none", borderBottom: `0.5px solid ${C.line}`,
-  borderRadius: 0, padding: "9px 2px", fontSize: 15, color: C.ink, outline: "none",
+  width: "100%", background: "transparent", border: "none", borderBottom: "0.5px solid var(--line)",
+  borderRadius: 0, padding: "9px 2px", fontSize: 15, color: "var(--ink)",
+  WebkitTextFillColor: "var(--ink)", caretColor: "var(--ink)", outline: "none",
 };
 
 function BoutonAjout({ label, onClick }) {
