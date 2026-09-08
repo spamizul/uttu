@@ -311,7 +311,7 @@ export default function App() {
   return (
     <div style={{ background: C.page, color: C.ink, minHeight: "100dvh", fontFamily: SANS }}>
       <style>{`
-        @import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600&display=swap");
+        @import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600&family=Climate+Crisis:YEAR@1979..2050&display=swap");
         button, input, select, textarea, img, .sq { border-radius: 0 !important; }
         input::placeholder, textarea::placeholder { color: #B0B0A6; }
         html, body { height: 100%; overscroll-behavior-y: none; }
@@ -323,8 +323,8 @@ export default function App() {
         .fil { stroke-dasharray: 46; stroke-dashoffset: 46; animation: tisser .45s ease-out forwards; }
         .trame { stroke-dashoffset: 0; opacity: 0; animation: paraitre .35s ease-out forwards; }
         .courbe { stroke-dasharray: 92; stroke-dashoffset: 92; animation: tisser .5s ease-out forwards; }
-        .apparait { opacity: 0; animation: monter .5s .72s ease-out forwards; }
-        .apparait.tard { animation-delay: .95s; }
+        .apparait { opacity: 0; animation: monter .5s .1s ease-out forwards; }
+        .apparait.tard { animation-delay: .45s; }
         @keyframes tisser { to { stroke-dashoffset: 0; } }
         @keyframes paraitre { to { opacity: 1; } }
         @keyframes monter { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
@@ -375,10 +375,7 @@ function Magasin({ tissus, mercerie, patrons, projets, courses, setCourses, onRa
 
   return (
     <div className="px-4 pt-6">
-      <Entete section="MAGASIN" colonnes={[
-        { valeur: n, label: "À TROUVER" },
-        { valeur: suivis.length, label: "PROJETS SUIVIS" },
-      ]}>
+      <Entete section="MAGASIN" valeur={n} unite={n > 1 ? "achats" : "achat"} droite={suivis.length > 0 ? `${suivis.length} projet(s) suivi(s)` : "aucun projet suivi"}>
         <button onClick={() => setTheme(theme === "clair" ? "sombre" : "clair")}
           style={{ color: C.encre }} aria-label={theme === "clair" ? "Passer en mode soir" : "Passer en mode jour"}>
           {theme === "clair" ? <Sun size={17} strokeWidth={1.7} /> : <Moon size={17} strokeWidth={1.7} />}
@@ -618,10 +615,7 @@ function Projets({ projets, patrons, tissus, onCreer, onSuivi, onOpen, onOpenArc
 
   return (
     <div className="px-4 pt-6">
-      <Entete section="PROJETS" colonnes={[
-        { valeur: enCours.length, label: "EN COURS" },
-        { valeur: archives.length, label: "COUSUS" },
-      ]} />
+      <Entete section="PROJETS" valeur={enCours.length} unite="en cours" droite={`${archives.length} cousus`} />
 
       <div className="flex gap-5 mb-5" style={{ borderBottom: `0.5px solid ${C.line}` }}>
         {[["cours", `En cours${enCours.length ? ` (${enCours.length})` : ""}`], ["archives", `Cousus${archives.length ? ` (${archives.length})` : ""}`]].map(([id, label]) => (
@@ -858,9 +852,7 @@ function EcranEnvies({ envies, onOpen, onAdd }) {
 
   return (
     <div className="px-4 pt-6">
-      <Entete section="ENVIES" colonnes={[
-        { valeur: envies.length, label: "EN ATTENTE" },
-      ]} />
+      <Entete section="ENVIES" valeur={envies.length} unite={envies.length > 1 ? "en attente" : "en attente"} droite="repérées, pas décidées" />
 
       {types.length > 1 && (
         <div className="flex gap-5 mb-5 overflow-x-auto pb-1">
@@ -1153,10 +1145,7 @@ function Patrons({ patrons, tags, onOpen, onAdd, onGererTags }) {
 
   return (
     <div className="px-4 pt-6">
-      <Entete section="PATRONS" colonnes={[
-        { valeur: patrons.length, label: "PATRONS" },
-        { valeur: cousus, label: "DÉJÀ COUSUS" },
-      ]}>
+      <Entete section="PATRONS" valeur={patrons.length} unite="réf" droite={`${cousus} déjà cousus`}>
         <Bascule vue={vue} setVue={setVue} />
       </Entete>
 
@@ -1779,11 +1768,8 @@ function VueTissus({ tissus, liste, matieres, q, setQ, filtre, setFiltre, total,
 
   return (
     <div>
-      <Entete section="RÉSERVE" colonnes={[
-        { valeur: total.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }), label: "MÈTRES" },
-        { valeur: tissus.length, label: "RÉFÉRENCES" },
-        { valeur: `${Math.round(valeur)} €`, label: "IMMOBILISÉS" },
-      ]}>
+      <Entete section="RÉSERVE" valeur={total.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        unite="m" droite={`${tissus.length} réf · ${Math.round(valeur)} €`}>
         <Bascule vue={vue} setVue={setVue} />
       </Entete>
 
@@ -2183,16 +2169,15 @@ function Trame({ taille = 96 }) {
 
 function Demarrage({ onFini }) {
   useEffect(() => {
-    const t = setTimeout(onFini, 2000);
+    const t = setTimeout(onFini, 1400);
     return () => clearTimeout(t);
   }, [onFini]);
 
   return (
     <div onClick={onFini} className="fixed inset-0 flex flex-col items-center justify-center"
       style={{ background: C.page, zIndex: 80 }}>
-      <Trame />
-      <div style={{ fontSize: 34, fontWeight: 600, letterSpacing: "-0.03em", marginTop: 18 }} className="apparait">uttu</div>
-      <div style={{ ...mono(9, C.encre, ".22em"), marginTop: 8 }} className="apparait tard">TISSUS · PATRONS · PROJETS</div>
+      <div className="apparait" style={{ fontFamily: '"Climate Crisis", sans-serif', fontSize: 56, color: "#C98F3E", lineHeight: 0.9 }}>uttu</div>
+      <div style={{ ...mono(9, C.inkSoft, ".22em"), marginTop: 16 }} className="apparait tard">TISSUS · PATRONS · PROJETS</div>
     </div>
   );
 }
@@ -2201,26 +2186,20 @@ function Points() {
   return <span style={{ flex: 1, borderBottom: `1px dotted ${C.pointille}`, margin: "0 6px", transform: "translateY(-3px)" }} />;
 }
 
-function Entete({ section, colonnes = [], children }) {
+function Entete({ section, valeur, unite, droite, children }) {
   return (
     <div style={{ marginBottom: 12 }}>
       <div className="flex items-center justify-between">
         <span style={mono(9, C.encre, ".18em")}>UTTU / {section}</span>
         {children}
       </div>
-
-      <div className="flex items-end justify-between" style={{ marginTop: 9, gap: 14 }}>
-        {colonnes.map((c, i) => (
-          <div key={c.label} style={{ textAlign: i === 0 ? "left" : "right" }}>
-            <div style={{ fontFamily: MONO, fontSize: i === 0 ? 25 : 15, color: C.ink, letterSpacing: "-0.02em", lineHeight: 1 }}>
-              {c.valeur}
-            </div>
-            <div style={{ ...mono(8.5, C.inkSoft, ".12em"), marginTop: 4 }}>{c.label}</div>
-          </div>
-        ))}
+      <div className="flex items-baseline" style={{ marginTop: 6 }}>
+        <span style={{ fontFamily: MONO, fontSize: 27, color: C.ink, letterSpacing: "-0.02em" }}>{valeur}</span>
+        {unite && <span style={{ ...mono(11), marginLeft: 5 }}>{unite}</span>}
+        <Points />
+        <span style={mono(11)}>{droite}</span>
       </div>
-
-      <div style={{ borderTop: `1.5px solid ${C.ink}`, marginTop: 11 }} />
+      <div style={{ borderTop: `1.5px solid ${C.ink}`, marginTop: 9 }} />
     </div>
   );
 }
