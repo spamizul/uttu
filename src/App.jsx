@@ -1,24 +1,32 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { supabase } from "./supabase";
-import { Store, Layers, Ruler, Shirt, Plus, X, Search, Trash2, Pencil, Check, Zap, CircleAlert, WifiOff, ShoppingBasket, Wand2, Eye, EyeOff, Tag, CalendarClock, SlidersHorizontal, Archive, Camera, CircleCheckBig, Heart, List, LayoutGrid } from "lucide-react";
+import { Store, Layers, Ruler, Shirt, Plus, X, Search, Trash2, Pencil, Check, Zap, CircleAlert, WifiOff, ShoppingBasket, Wand2, Eye, EyeOff, Tag, CalendarClock, SlidersHorizontal, Archive, Camera, CircleCheckBig, Heart, List, LayoutGrid, Sun, Moon } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
-const C = {
-  page: "#F6F5F0",
-  ground: "#EDECE5",
-  surface: "#FBFAF6",
-  ink: "#17170F",
-  inkSoft: "#7C8B9E",
-  encre: "#2B4C7E",
-  line: "#E1E0D7",
-  pointille: "#A9B6C6",
-  tampon: "#B3402C",
-  accent: "#17170F",
-  bleu: "#17170F",
-  fil: "#EDECE5",
-  alerte: "#8A3A2E",
-  ok: "#17170F",
+const THEMES = {
+  clair: {
+    page: "#F6F5F0", ground: "#EDECE5", surface: "#FBFAF6",
+    ink: "#17170F", inkSoft: "#7C8B9E", faible: "#A8B2BE",
+    line: "#E1E0D7", pointille: "#A9B6C6", encre: "#2B4C7E",
+    alerte: "#8A3A2E", voile: "rgba(23,23,15,.45)",
+  },
+  sombre: {
+    page: "#0F0E0C", ground: "#1C1913", surface: "#17150F",
+    ink: "#F0E7D8", inkSoft: "#8A7C66", faible: "#5E5344",
+    line: "#262019", pointille: "#3A3227", encre: "#C98F3E",
+    alerte: "#C4705A", voile: "rgba(0,0,0,.62)",
+  },
 };
+
+// C est muté au rendu selon l'ambiance choisie
+const C = { ...THEMES.clair };
+Object.defineProperties(C, {
+  bleu: { get() { return C.ink; } },
+  accent: { get() { return C.ink; } },
+  ok: { get() { return C.ink; } },
+  fil: { get() { return C.ground; } },
+  tampon: { get() { return C.alerte; } },
+});
 
 const MONO = 'ui-monospace, Menlo, "SF Mono", Consolas, monospace';
 const SANS = '"Bricolage Grotesque", -apple-system, BlinkMacSystemFont, sans-serif';
@@ -140,6 +148,17 @@ export default function App() {
       console.log("Supabase →", { data, error });
     });
   }, []);
+
+  const [theme, setTheme] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches ? "sombre" : "clair"
+  );
+  Object.assign(C, THEMES[theme]);
+
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", THEMES[theme].page);
+    document.body.style.background = THEMES[theme].page;
+  }, [theme]);
 
   const [demarrage, setDemarrage] = useState(true);
   const [tab, setTab] = useState("magasin");
@@ -311,7 +330,7 @@ export default function App() {
         @keyframes monter { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
       `}</style>
       <div className="mx-auto" style={{ maxWidth: 560, paddingBottom: "calc(132px + env(safe-area-inset-bottom))" }}>
-        {tab === "magasin" && <Magasin tissus={tissus} mercerie={mercerie} patrons={patrons} projets={projets} courses={visibles} setCourses={setCourses} onRapide={(pf) => setRapide(pf || {})} envies={envies} onEnvie={setEditEnvie} />}
+        {tab === "magasin" && <Magasin tissus={tissus} mercerie={mercerie} patrons={patrons} projets={projets} courses={visibles} setCourses={setCourses} onRapide={(pf) => setRapide(pf || {})} envies={envies} onEnvie={setEditEnvie} theme={theme} setTheme={setTheme} />}
         {tab === "reserve" && (
           <Reserve tissus={tissus} mercerie={mercerie} onOpen={setDetail} onAdd={() => setEdit({})}
             onOpenMercerie={setEditMercerie} onAddMercerie={() => setEditMercerie({})} />
@@ -349,14 +368,19 @@ export default function App() {
 
 /* ------------------------------ MAGASIN --------------------------- */
 
-function Magasin({ tissus, mercerie, patrons, projets, courses, setCourses, onRapide, envies, onEnvie }) {
+function Magasin({ tissus, mercerie, patrons, projets, courses, setCourses, onRapide, envies, onEnvie, theme, setTheme }) {
   const [ouvert, setOuvert] = useState("liste");
   const n = courses.filter((c) => !c.fait).length;
   const suivis = projets.filter((p) => p.suivi);
 
   return (
     <div className="px-4 pt-6">
-      <Entete section="MAGASIN" valeur={n} unite={n > 1 ? "achats" : "achat"} droite={suivis.length > 0 ? `${suivis.length} projet(s) suivi(s)` : "aucun projet suivi"} />
+      <Entete section="MAGASIN" valeur={n} unite={n > 1 ? "achats" : "achat"} droite={suivis.length > 0 ? `${suivis.length} projet(s) suivi(s)` : "aucun projet suivi"}>
+        <button onClick={() => setTheme(theme === "clair" ? "sombre" : "clair")}
+          style={{ color: C.encre }} aria-label={theme === "clair" ? "Passer en mode soir" : "Passer en mode jour"}>
+          {theme === "clair" ? <Sun size={17} strokeWidth={1.7} /> : <Moon size={17} strokeWidth={1.7} />}
+        </button>
+      </Entete>
 
       <Accordeon titre="Ma liste" sous={n > 0 ? `${n} chose${n > 1 ? "s" : ""} à trouver` : "Rien à trouver pour l'instant"} icone={<ShoppingBasket size={19} />}
         ouvert={ouvert === "liste"} onClick={() => setOuvert(ouvert === "liste" ? "" : "liste")}>
@@ -1229,7 +1253,7 @@ function VignettePatron({ patron, indice, taille, carre }) {
         <span style={{ ...mono(7.5, C.page, ".08em"), position: "absolute", left: 6, top: 6, background: C.ink, padding: "2px 5px" }}>COUSU</span>
       )}
       <span style={mono(9, C.inkSoft, ".12em")}>{ref(indice, "P")}</span>
-      {carre && <span style={mono(8, "#B0B0A6", ".1em")}>{(patron.categorie || "").toUpperCase()}</span>}
+      {carre && <span style={mono(8, C.faible, ".1em")}>{(patron.categorie || "").toUpperCase()}</span>}
     </span>
   );
 }
@@ -2184,10 +2208,10 @@ function Entete({ section, valeur, unite, droite, children }) {
 function Bascule({ vue, setVue }) {
   return (
     <span className="flex gap-3">
-      <button onClick={() => setVue("liste")} aria-label="Vue en liste" style={{ color: vue === "liste" ? C.ink : "#B0B0A6" }}>
+      <button onClick={() => setVue("liste")} aria-label="Vue en liste" style={{ color: vue === "liste" ? C.ink : C.faible }}>
         <List size={16} strokeWidth={1.8} />
       </button>
-      <button onClick={() => setVue("carres")} aria-label="Vue en carrés" style={{ color: vue === "carres" ? C.ink : "#B0B0A6" }}>
+      <button onClick={() => setVue("carres")} aria-label="Vue en carrés" style={{ color: vue === "carres" ? C.ink : C.faible }}>
         <LayoutGrid size={16} strokeWidth={1.8} />
       </button>
     </span>
@@ -2301,7 +2325,7 @@ function Champ({ label, children }) {
 
 function Overlay({ children, onClose }) {
   return (
-    <div className="fixed inset-0 flex items-end justify-center" style={{ background: "rgba(21,36,48,.45)", zIndex: 50 }} onClick={onClose}>
+    <div className="fixed inset-0 flex items-end justify-center" style={{ background: C.voile, zIndex: 50 }} onClick={onClose}>
       <div className="w-full rounded-t-2xl overflow-y-auto" style={{ background: C.surface, maxWidth: 560, maxHeight: "92vh" }} onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-end" style={{ position: "sticky", top: 0 }}>
           <button onClick={onClose} className="rounded-full flex items-center justify-center"
@@ -2330,7 +2354,7 @@ function Nav({ tab, setTab, badge }) {
           const actif = tab === id;
           return (
             <button key={id} onClick={() => setTab(id)} className="flex items-center gap-1.5"
-              style={{ position: "relative", color: actif ? C.encre : "#A8B2BE", padding: "4px 6px" }} aria-label={label}>
+              style={{ position: "relative", color: actif ? C.encre : C.faible, padding: "4px 6px" }} aria-label={label}>
               <Icone size={20} strokeWidth={actif ? 2 : 1.6} />
               {actif && <span style={mono(9, C.encre, ".08em")}>{label.toUpperCase()}</span>}
               {id === "magasin" && badge > 0 && !actif && (
