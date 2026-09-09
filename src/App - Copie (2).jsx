@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useEffect, useRef } from "react";
-import { Store, Layers, Ruler, Shirt, Plus, X, Search, Trash2, Pencil, Check, Zap, CircleAlert, WifiOff, ShoppingBasket, Wand2, Eye, EyeOff, Tag, CalendarClock, SlidersHorizontal, Archive, Camera, CircleCheckBig, Heart, List, LayoutGrid, Sun, Moon } from "lucide-react";
+import React, { useState, useMemo, useEffect } from "react";
 import { supabase } from "./supabase";
+import { Store, Layers, Ruler, Shirt, Plus, X, Search, Trash2, Pencil, Check, Zap, CircleAlert, WifiOff, ShoppingBasket, Wand2, Eye, EyeOff, Tag, CalendarClock, SlidersHorizontal, Archive, Camera, CircleCheckBig, Heart, List, LayoutGrid, Sun, Moon } from "lucide-react";
 
 function useStickyState(defaut, cle) {
   const [valeur, setValeur] = useState(() => {
@@ -9,29 +9,9 @@ function useStickyState(defaut, cle) {
       return brut ? JSON.parse(brut) : defaut;
     } catch { return defaut; }
   });
-  const pret = useRef(false);
-
-  useEffect(() => {
-    supabase.from("app_data").select("valeur").eq("cle", cle).maybeSingle()
-      .then(({ data, error }) => {
-        if (error) console.log("ERREUR lecture", cle, error);
-        if (data) {
-          setValeur(data.valeur);
-        } else {
-          supabase.from("app_data").upsert({ cle, valeur, maj: new Date().toISOString() })
-            .then(({ error }) => { if (error) console.log("ERREUR creation", cle, error); });
-        }
-        pret.current = true;
-      });
-  }, [cle]);
-
   useEffect(() => {
     try { localStorage.setItem(cle, JSON.stringify(valeur)); } catch {}
-    if (!pret.current) return;
-    supabase.from("app_data").upsert({ cle, valeur, maj: new Date().toISOString() })
-      .then(({ error }) => { if (error) console.log("ERREUR ecriture", cle, error); });
   }, [cle, valeur]);
-
   return [valeur, setValeur];
 }
 
