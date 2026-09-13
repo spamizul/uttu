@@ -1025,22 +1025,6 @@ function FormulaireEnvie({ envie, onSave, onDelete, onAcheter, onClose }) {
   );
 }
 
-function GaleriePhotos({ photos }) {
-  if (!photos || photos.length === 0) return null;
-  return (
-    <div className="flex flex-wrap gap-2" style={{ marginTop: 16 }}>
-      {photos.map((src, i) => (
-        <img key={i} src={src} alt="" style={{
-          width: photos.length === 1 ? "100%" : 110,
-          maxHeight: photos.length === 1 ? 320 : 110,
-          height: photos.length === 1 ? "auto" : 110,
-          borderRadius: 12, objectFit: "contain", display: "block",
-          background: C.ground,
-        }} />
-      ))}
-    </div>
-  );
-}
 function Galerie({ photos, onRetirer, onAjouter }) {
   return (
     <div className="flex flex-wrap gap-2">
@@ -1371,7 +1355,6 @@ function FichePatron({ patron, onClose, onEdit, onDelete }) {
         <h2 style={{ fontSize: 23, fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.2 }}>{patron.nom}</h2>
         <p style={{ ...mono(9, C.inkSoft, ".1em"), marginTop: 6, textTransform: "uppercase" }}>{patron.marque}{patron.categorie ? ` · ${patron.categorie}` : ""}</p>
         <div style={{ borderTop: `1.5px solid ${C.ink}`, marginTop: 11 }} />
-        <GaleriePhotos photos={patron.photos} />
 
         {(patron.tags || []).length > 0 && (
           <div className="flex flex-wrap gap-1.5" style={{ marginTop: 12 }}>
