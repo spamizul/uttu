@@ -3,22 +3,34 @@ import { Store, Layers, Ruler, Shirt, Plus, X, Search, Trash2, Pencil, Check, Za
 import { supabase } from "./supabase";
 
 function useStickyState(defaut, cle) {
-  const [valeur, setValeur] = useState(() => {
+  const lireLocal = () => {
     try {
       const brut = localStorage.getItem(cle);
-      return brut ? JSON.parse(brut) : defaut;
-    } catch { return defaut; }
+      if (!brut) return null;
+      const p = JSON.parse(brut);
+      if (p && typeof p === "object" && "valeur" in p && "maj" in p) return p;
+      return { valeur: p, maj: null };
+    } catch { return null; }
+  };
+
+  const [valeur, setValeur] = useState(() => {
+    const local = lireLocal();
+    return local ? local.valeur : defaut;
   });
   const pret = useRef(false);
+  const premierRendu = useRef(true);
 
   useEffect(() => {
-    supabase.from("app_data").select("valeur").eq("cle", cle).maybeSingle()
+    supabase.from("app_data").select("valeur, maj").eq("cle", cle).maybeSingle()
       .then(({ data, error }) => {
         if (error) console.log("ERREUR lecture", cle, error);
-        if (data) {
+        const local = lireLocal();
+        const localPlusRecent = local && local.maj && (!data || !data.maj || new Date(local.maj) > new Date(data.maj));
+        if (data && !localPlusRecent) {
           setValeur(data.valeur);
-        } else {
-          supabase.from("app_data").upsert({ cle, valeur, maj: new Date().toISOString() })
+        } else if (local) {
+          const maj = local.maj || new Date().toISOString();
+          supabase.from("app_data").upsert({ cle, valeur: local.valeur, maj })
             .then(({ error }) => { if (error) console.log("ERREUR creation", cle, error); });
         }
         pret.current = true;
@@ -26,15 +38,16 @@ function useStickyState(defaut, cle) {
   }, [cle]);
 
   useEffect(() => {
-    try { localStorage.setItem(cle, JSON.stringify(valeur)); } catch {}
+    if (premierRendu.current) { premierRendu.current = false; return; }
+    const maintenant = new Date().toISOString();
+    try { localStorage.setItem(cle, JSON.stringify({ valeur, maj: maintenant })); } catch {}
     if (!pret.current) return;
-    supabase.from("app_data").upsert({ cle, valeur, maj: new Date().toISOString() })
+    supabase.from("app_data").upsert({ cle, valeur, maj: maintenant })
       .then(({ error }) => { if (error) console.log("ERREUR ecriture", cle, error); });
   }, [cle, valeur]);
 
   return [valeur, setValeur];
 }
-
 /* ------------------------------------------------------------------ */
 const THEMES = {
   clair: {

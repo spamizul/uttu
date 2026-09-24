@@ -1,0 +1,1 @@
+url supabase https://supabase.com/dashboard/project/djfhjfuqoymvekzrylsj/editor
