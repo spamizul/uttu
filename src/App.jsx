@@ -594,7 +594,10 @@ function Liste({ courses, setCourses, onRapide, mercerie = [] }) {
                 style={{ width: 26, height: 26, background: C.ok, border: `1.5px solid ${C.ok}` }} aria-label="Décocher">
                 <Check size={15} color="#fff" />
               </button>
-              <span style={{ fontSize: 15, color: C.inkSoft, textDecoration: "line-through" }}>{c.libelle}</span>
+                            <span style={{ fontSize: 15, color: C.inkSoft, textDecoration: "line-through", flex: 1 }}>{c.libelle}</span>
+              <button onClick={() => supprimer(c.id)} className="flex-shrink-0" style={{ padding: 4 }} aria-label="Retirer de la liste">
+                <X size={16} color={C.inkSoft} />
+              </button>
             </div>
           ))}
         </div>
